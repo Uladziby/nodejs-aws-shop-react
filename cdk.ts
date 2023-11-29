@@ -38,6 +38,9 @@ new deployment.BucketDeployment(stack, "DeployWebApp", {
 new cdk.CfnOutput(stack, "Domain URL", {
 	value: cloudfrontDistribution.distributionDomainName,
 });
+
+app.synth();
+
 /* const stack = new MyStaticSiteStack(app, "ImportServiceStack");
 
 export class StaticSite extends Construct {
@@ -101,5 +104,5 @@ class MyStaticSiteStack extends cdk.Stack {
 	}
 }
 
-app.synth();
+
  */
