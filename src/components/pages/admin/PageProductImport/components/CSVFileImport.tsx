@@ -1,60 +1,67 @@
-import React from "react";
+/** @format */
+
+import React, { useEffect } from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import axios from "axios";
 
 type CSVFileImportProps = {
-  url: string;
-  title: string;
+	url: string;
+	title: string;
 };
 
 export default function CSVFileImport({ url, title }: CSVFileImportProps) {
-  const [file, setFile] = React.useState<File>();
+	const [file, setFile] = React.useState<File>();
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      setFile(file);
-    }
-  };
+	const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const files = e.target.files;
+		if (files && files.length > 0) {
+			const file = files[0];
+			setFile(file);
+		}
+	};
+	useEffect(() => {
+		localStorage.setItem("token", "Basic VWxhZHppYnk6VEVTVF9QQVNTV09SRA");
+	}, []);
 
-  const removeFile = () => {
-    setFile(undefined);
-  };
+	const removeFile = () => {
+		setFile(undefined);
+	};
 
-  const uploadFile = async () => {
-    console.log("uploadFile to", url);
+	const uploadFile = async () => {
+		console.log("uploadFile to", url);
+		const token = localStorage.getItem("token");
+		// Get the presigned URL
+		const response = await axios({
+			method: "GET",
+			url,
+			params: {
+				headers: token ? { Authorization: `${token}` } : undefined,
+				name: encodeURIComponent(file!.name),
+			},
+		});
+		console.log("File to upload: ", file!.name);
+		console.log("Uploading to: ", response.data);
+		const result = await fetch(response.data, {
+			method: "PUT",
+			body: file,
+		});
+		console.log("Result: ", result);
+	};
 
-    // Get the presigned URL
-    // const response = await axios({
-    //   method: "GET",
-    //   url,
-    //   params: {
-    //     name: encodeURIComponent(file.name),
-    //   },
-    // });
-    // console.log("File to upload: ", file.name);
-    // console.log("Uploading to: ", response.data);
-    // const result = await fetch(response.data, {
-    //   method: "PUT",
-    //   body: file,
-    // });
-    // console.log("Result: ", result);
-    // setFile("");
-  };
-  return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        {title}
-      </Typography>
-      {!file ? (
-        <input type="file" onChange={onFileChange} />
-      ) : (
-        <div>
-          <button onClick={removeFile}>Remove file</button>
-          <button onClick={uploadFile}>Upload file</button>
-        </div>
-      )}
-    </Box>
-  );
+	return (
+		<Box>
+			<Typography variant="h6" gutterBottom>
+				{title}
+			</Typography>
+			{!file ? (
+				<input type="file" onChange={onFileChange} />
+			) : (
+				<div>
+					<button onClick={removeFile}>Remove file</button>
+					<button onClick={uploadFile}>Upload file</button>
+				</div>
+			)}
+		</Box>
+	);
 }
